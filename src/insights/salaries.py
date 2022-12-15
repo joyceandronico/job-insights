@@ -1,3 +1,4 @@
+import contextlib
 from typing import Union, List, Dict
 from src.insights.jobs import read
 
@@ -7,7 +8,8 @@ def get_max_salary(path: str) -> int:
     return max(
         int(job["max_salary"])
         for job in jobs
-        if job["max_salary"] != "" and job["max_salary"].isdigit())
+        if job["max_salary"] != "" and job["max_salary"].isdigit()
+    )
 
 
 def get_min_salary(path: str) -> int:
@@ -15,15 +17,17 @@ def get_min_salary(path: str) -> int:
     return min(
         int(job["min_salary"])
         for job in jobs
-        if job["min_salary"] != "" and job["min_salary"].isdigit())
+        if job["min_salary"] != "" and job["min_salary"].isdigit()
+    )
 
 
 def matches_salary_range(job: Dict, salary: Union[int, str]) -> bool:
-    if 'min_salary' not in job or 'max_salary' not in job:
+    if "min_salary" not in job or "max_salary" not in job:
         raise ValueError
     elif (
         not str(job["min_salary"]).isnumeric()
-            or not str(job["max_salary"]).isnumeric()):
+        or not str(job["max_salary"]).isnumeric()
+    ):
         raise ValueError
 
     elif int(job["min_salary"]) >= int(job["max_salary"]):
@@ -37,21 +41,12 @@ def matches_salary_range(job: Dict, salary: Union[int, str]) -> bool:
 
 
 def filter_by_salary_range(
-    jobs: List[dict],
-    salary: Union[str, int]
+    jobs: List[dict], salary: Union[str, int]
 ) -> List[Dict]:
-    """Filters a list of jobs by salary range
 
-    Parameters
-    ----------
-    jobs : list
-        The jobs to be filtered
-    salary : int
-        The salary to be used as filter
-
-    Returns
-    -------
-    list
-        Jobs whose salary range contains `salary`
-    """
-    raise NotImplementedError
+    job_list = []
+    for job in jobs:
+        with contextlib.suppress(ValueError):
+            if matches_salary_range(job, salary):
+                job_list.append(job)
+    return job_list
